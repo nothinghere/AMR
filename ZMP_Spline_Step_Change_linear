@@ -90,7 +90,6 @@ Zmp = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
 %Xc1 = x_constant( t0, t1, a01, om, t);
 
 
-
 Xc1 = a11*x_linear( t0, t1, T10,om, t)+x_constant( t0, t1, a01, om, t);
 
 % Second segment from t1 to t2 --- Spline
@@ -159,19 +158,21 @@ Xc = Xc1 + Xc2 + Xc3 + Xc4 + Xc5;
 
 t4n = t4 + 0.2;          % new t4n
 T43n = t4n - t3;         % and therefore new time interval
-
-a24 = 3/T43n^2*(a05 - a04);
-a34 = 2/T43n^3*(a04 - a05);
-
+a05n=a05+a15*(t4n-t4);
+a24n = 3/T43n^2*(a05n - a04);
+a34n = 2/T43n^3*(a04 - a05n);
+% 
+% a24 = 3/T43n^2*(a05 - a04);
+% a34 = 2/T43n^3*(a04 - a05);
 
 % New desired ZMP trajectory
 Zmpn = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
         (a02 + a12*(t - t1) + a22*(t-t1).^2 + a32*(t-t1).^3).*...
         (stepfun(t,t1)-stepfun(t,t2)) + ...
         (a03 + a13*(t - t2)).*(stepfun(t,t2)-stepfun(t,t3)) + ...
-        (a04 + a14*(t - t3) + a24*(t-t3).^2 + a34*(t-t3).^3).*...
+        (a04 + a14*(t - t3) + a24n*(t-t3).^2 + a34n*(t-t3).^3).*...
         (stepfun(t,t3)-stepfun(t,t4n)) + ...        
-        (a05 + a15*(t - t4n)).*(stepfun(t,t4n)-stepfun(t,t5));
+        (a05n + a15*(t - t4n)).*(stepfun(t,t4n)-stepfun(t,t5));
         %a05*(stepfun(t,t4n)-stepfun(t,t5));
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
 % ZMP variation in tvar
@@ -190,16 +191,17 @@ varstep = steplength2/2; % variation amplitude, just an example
 
 
 a03v = 0;
-a04v = a03v;
 a14v = 0;
+
+a04v = a03v+a14v*(tvar-t2);
 a24v = 3/T43n^2*varstep;
 a34v = -2/T43n^3*varstep;
-a05v = a03v + varstep;
+a05v = a04v + varstep;
 
 ZmpVar = a03v*(stepfun(t,tvar)-stepfun(t,t3)) + ...
         (a04v + a14v*(t - t3) + a24v*(t-t3).^2 + a34v*(t-t3).^3).*...
         (stepfun(t,t3)-stepfun(t,t4n)) + ...
-        a05v*stepfun(t,t4n);
+        (a05v)*stepfun(t,t4n);
 
 % CoM corresponding variation
 
