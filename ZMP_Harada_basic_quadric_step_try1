@@ -1,0 +1,316 @@
+
+% ZMP ---> CoM
+% Harada solution
+% 2 steps
+% ZMP = 5 segments: Linear/Cubic/Linear/Cubic/linear
+%
+% Last update: 22/06/2014
+%
+
+
+clear all
+close all
+
+rossomattone = [ 1.0 0.3 0.3 ];
+bluoceano = [ 0.0 0.5 0.9 ];
+gialloocra = [ 0.75 0.75 0.0 ];
+
+% Cost-Lin-Cost parameters
+% aij = a_i^{(j)} Harada's notation
+
+tf = 4;
+
+t = 0:0.001:4;
+
+g = 9.8;
+zG = 0.8; % Center of Mass constant height
+zzmp=0;
+
+Tc = sqrt(g/(zG-zzmp));
+% Steps time duration
+
+stepss1 = 0.7; % First Single support step duration (1st segment)
+stepds2 = 0.1; % First Double support step duration (2nd segment)
+stepss3 = 0.7; % Second Single support step duration (3rd segment)
+stepds4 = 0.1; % Second Double support step duration (4th segment)
+stepss5 = 0.7; % Third Single support step duration (5th segment)
+
+
+steplength1 = 0.3; % First step length
+steplength2 = 0.3; % Second step length
+
+
+t0 = 0.0; % Initial time
+t1 = t0 + stepss1;
+t2 = t1 + stepds2;
+t3 = t2 + stepss3;
+t4 = t3 + stepds4;
+t5 = t4 + stepss5 + 20; % These 20 seconds are added since calculus is anticipative
+
+% Terms and coefficients used in the desired ZMP trajectory
+T10 = t1 - t0;
+T21 = t2 - t1;
+T32 = t3 - t2;
+T43 = t4 - t3;
+T54 = t5 - t4;
+
+a01 = 0;
+a11=0;
+%a11=0.05;
+
+
+
+a02 = a01+a11*T10;
+a13=a11;
+
+a03 = steplength1;
+a04 = a03+a13*T32;
+a05 = a03 + steplength2;
+
+
+a22 = (a03 - a02)/((t2-t1)^2+2*t1*(t2-t1));
+a12 = 2*a22*t1;
+
+
+a24 = (a05 - a04)/((t4-t3)^2+2*t3*(t4-t3));
+a14 = 2*a24*t3;
+
+a15=a11;
+
+
+
+Zmp = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
+        (a02 + a12*(t - t1) + a22*(t-t1).^2).*...
+        (stepfun(t,t1)-stepfun(t,t2)) + ...
+        (a03 + a13*(t - t2)).*(stepfun(t,t2)-stepfun(t,t3)) + ...
+        (a04 + a14*(t - t3) + a24*(t-t3).^2 ).*...
+        (stepfun(t,t3)-stepfun(t,t4)) + ...
+        (a05 + a15*(t - t4)).*(stepfun(t,t4)-stepfun(t,t5));
+
+      
+%i=0..3;  exposants   n=3   
+%j=0..5; temps        m=5
+
+%Aij
+
+A11=a11;
+A01=a01;
+
+A02= a02;
+A12= a12;
+A22= a22+1/Tc^2*(0+1)*(1+1)*A02;
+
+
+A13=a13;
+A03=a03;
+
+
+A04= a04;
+A14= a14;
+A24= a24+1/Tc^2*(0+1)*(1+1)*A04;
+
+A15=a15;
+A05=a05;
+
+xG1=a01;
+xG2=a02;
+xG3=a03;
+xG4=a04;
+xG5=a05;
+
+
+
+o=[1 0 0 0 ];
+l1 =li(t0,t1,Tc);
+l2=li(t1,t2,Tc);
+l3=li(t2,t3,Tc);
+l4=li(t3,t4,Tc);
+
+
+Mm1= [0 0 cosh(Tc*(t5-t4)) sinh(Tc*(t5-t4))];
+
+
+l=[o,zeros(1,6);
+    l1,zeros(2,6);
+    zeros(2,2),l2,zeros(2,4);
+    zeros(2,4),l3,zeros(2,2);
+    zeros(2,6),l4;   
+    zeros(1,6),Mm1];
+             
+D=[xG1-A01;A02-A01*(t1-t0)^0-A11*(t1-t0)^1;
+          A12-A11*1*(t1-t0)^0;
+          
+          A03-A02*(t2-t1)^0-A12*(t2-t1)^1-A22*(t2-t1)^2;
+          A13-A12*1*(t2-t1)^0-A22*2*(t2-t1)^1;
+          
+          A04-A03*(t3-t2)^0-A13*(t3-t2)^1;
+          A14-A13*1*(t3-t2)^0;
+          
+          A05-A04*(t4-t3)^0-A14*(t4-t3)^1-A24*(t4-t3)^2;
+          A15-A14*1*(t4-t3)^0-A24*2*(t4-t3)^1;
+         xG5-A05*(t5-t4)^0-A15*(t5-t4)^1];
+ 
+
+VW=l\D;
+
+
+
+
+Xc = (VW(1,1)*cosh(Tc*(t-t0))+VW(2,1)*sinh(Tc*(t-t0))+A01*(t-t0).^0+A11*(t-t0).^1).*...
+     (stepfun(t,t0)-stepfun(t,t1))+...
+    (VW(3,1)*cosh(Tc*(t-t1))+VW(4,1)*sinh(Tc*(t-t1))+A02*(t-t1).^0+A12*(t-t1).^1+A22*(t-t1).^2).*...
+     (stepfun(t,t1)-stepfun(t,t2))+...
+    (VW(5,1)*cosh(Tc*(t-t2))+VW(6,1)*sinh(Tc*(t-t2))+A03*(t-t2).^0+A13*(t-t2).^1).*...
+     (stepfun(t,t2)-stepfun(t,t3))+...
+     (VW(7,1)*cosh(Tc*(t-t3))+VW(8,1)*sinh(Tc*(t-t3))+A04*(t-t3).^0+A14*(t-t3).^1+A24*(t-t3).^2).*...
+     (stepfun(t,t3)-stepfun(t,t4))+...
+     (VW(9,1)*cosh(Tc*(t-t4))+VW(10,1)*sinh(Tc*(t-t4))+A05*(t-t4).^0+A15*(t-t4).^1).*...
+     (stepfun(t,t4)-stepfun(t,t5));      
+
+ 
+%   plot(t,Zmp);
+%    hold on    
+%      plot(t,Xc,'r');grid
+%      
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% This second part is only needed if a step change occurs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Terms and coefficients used in the desired ZMP trajectory
+% New terms since t4 has changed in t4n
+% We first compute the new ZMP deriving from the new t4n
+% and then add the variation (it's just a choice)
+
+t4n = t4 + 0.2; % new t4n
+T43n = t4n - t3; % and therefore new time interval
+a05n=a05+a15*(t4n-t4)+0.5*stepss3;
+
+a24n = (a05n - a04)/((t4n-t3)^2+2*t3*(t4n-t3));
+a14n = 2*a24n*t3;
+
+%
+% a24 = 3/T43n^2*(a05 - a04);
+% a34 = 2/T43n^3*(a04 - a05);
+
+% New desired ZMP trajectory
+Zmpn = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
+        (a02 + a12*(t - t1) + a22*(t-t1).^2).*...
+        (stepfun(t,t1)-stepfun(t,t2)) + ...
+        (a03 + a13*(t - t2)).*(stepfun(t,t2)-stepfun(t,t3)) + ...
+        (a04 + a14n*(t - t3) + a24n*(t-t3).^2 ).*...
+        (stepfun(t,t3)-stepfun(t,t4n)) + ...
+        (a05n + a15*(t - t4n)).*(stepfun(t,t4n)-stepfun(t,t5));
+        %a05*(stepfun(t,t4n)-stepfun(t,t5));
+    
+A04n= a04;
+A14n= a14n;
+A24n= a24n+1/Tc^2*(0+1)*(1+1)*A04n;    
+
+
+A15n=0;
+A05n=a05n;
+
+xG5n=A05n;
+l0= [1, 0,-2/Tc^2;1,T10,T10^2-2/Tc^2];
+l11=[1,0,0;0,1,0;1,T10,T10^2;0,1,2*T10];
+l12=[1,0,0,0;
+    0,Tc,0,0;
+    cosh(Tc*T10),sinh(Tc*T10),-1,0;
+    Tc*sinh(Tc*T10),Tc*cosh(Tc*T10),0,-Tc];
+
+l4n=li(t3,t4n,Tc);
+Mm1n= [0 0 cosh(Tc*(t5-t4n)) sinh(Tc*(t5-t4n))];
+
+ln=[l0,zeros(2,10);
+    l11,l12,zeros(4,6);
+    zeros(2,5),l2,zeros(2,4);
+    zeros(2,7),l3,zeros(2,2);
+    zeros(2,9),l4n;   
+    zeros(1,9),Mm1n];
+             
+
+ZmpT0=Zmp(round(t0/0.001)+1);
+ZmpT1=Zmp(round(t1/0.001)+1);
+
+xG1p = (Zmp(round(t0/0.001)+1)+Zmp(round(t0/0.001+2)))/0.001;
+
+Dn=[ZmpT0;ZmpT1;xG1;xG1p;A02;A12;    
+          
+          A03-A02*(t2-t1)^0-A12*(t2-t1)^1-A22*(t2-t1)^2;
+          A13-A12*1*(t2-t1)^0-A22*2*(t2-t1)^1
+          
+          A04n-A03*(t3-t2)^0-A13*(t3-t2)^1;
+          A14n-A13*1*(t3-t2)^0;
+          
+          A05n-A04n*(t4n-t3)^0-A14n*(t4n-t3)^1-A24n*(t4n-t3)^2;
+          A15n-A14n*1*(t4n-t3)^0-A24n*2*(t4n-t3)^1;
+         
+          xG5n-A05n*(t5-t4n)^0-A15n*(t5-t4n)^1];
+
+    
+  
+VWn=ln\Dn;
+
+
+A01n=VWn(1,1);
+A11n=VWn(2,1);
+A21n=VWn(3,1);
+
+Xcn = (VWn(4,1)*cosh(Tc*(t-t0))+VWn(5,1)*sinh(Tc*(t-t0))+A01n*(t-t0).^0+A11n*(t-t0).^1+A21n*(t-t0).^2).*...
+     (stepfun(t,t0)-stepfun(t,t1))+...
+    (VWn(6,1)*cosh(Tc*(t-t1))+VWn(7,1)*sinh(Tc*(t-t1))+A02*(t-t1).^0+A12*(t-t1).^1+A22*(t-t1).^2).*...
+     (stepfun(t,t1)-stepfun(t,t2))+...
+     (VWn(8,1)*cosh(Tc*(t-t2))+VWn(9,1)*sinh(Tc*(t-t2))+A03*(t-t2).^0+A13*(t-t2).^1).*...
+      (stepfun(t,t2)-stepfun(t,t3))+...
+      (VWn(10,1)*cosh(Tc*(t-t3))+VWn(11,1)*sinh(Tc*(t-t3))+A04n*(t-t3).^0+A14n*(t-t3).^1+A24n*(t-t3).^2).*...
+      (stepfun(t,t3)-stepfun(t,t4n))+...
+      (VWn(12,1)*cosh(Tc*(t-t4n))+VWn(13,1)*sinh(Tc*(t-t4n))+A05n*(t-t4n).^0+A15n*(t-t4n).^1).*...
+      (stepfun(t,t4n)-stepfun(t,t5));  
+    
+    
+    
+    XcVar=0;
+    
+    
+    
+    
+    
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+figure(2);
+A0 = plot(t,Zmp, t, 0, t, Zmpn, t,Xc, t,0, t, Xcn);
+
+A1 = line([t0,t0],[0,0.8]);
+A2 = line([t1,t1],[0,0.8]);
+A3 = line([t2,t2],[0,0.8]);
+A4 = line([t3,t3],[0,0.8]);
+A5 = line([t4,t4],[0,0.8]);
+%A6 = line([tvar,tvar],[0,0.8]);
+%A7 = line([t4n,t4n],[0,0.8]);
+
+
+grid
+set(A1(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+set(A2(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+set(A3(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+set(A4(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+set(A5(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+%set(A6(1),'Color',rossomattone,'LineWidth',0.5,'LineStyle','-.');
+%set(A7(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+
+
+set(A0(1),'Color',bluoceano,'LineWidth',1.2);
+set(A0(2),'Color',bluoceano,'LineWidth',1.2,'LineStyle','--'); % Delta ZMP
+%set(A0(5),'Color',rossomattone,'LineWidth',1.2,'LineStyle','--'); % Delta Xc
+%set(A0(4),'Color',bluoceano,'LineWidth',1.2);
+%set(A0(3),'Color',rossomattone,'LineWidth',1.2);
+%set(A0(6),'Color',rossomattone,'LineWidth',1.2);
+
+xlabel('t (sec)', 'FontName','cmr','FontSize',12)
+
+
+     
+     
