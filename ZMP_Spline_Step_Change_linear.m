@@ -293,21 +293,43 @@ SysAs = ss(A+B*F,B,C,D);  % Closed-loop system
  
  
 x0 = [0, 0];
- 
+x0_1 = [0.1, 0.1];
+x0_2 = [0.2, 0.2];
+x0_3 = [0.3, 0.3];
+x0_4 = [0.4, 0.4];
+x0_5 = [0.1, 0.5];
+x0_6 = [0.5, 0.6];
+x0_7 = [0.6, 0.7];
+x0_8 = [0.7, 0.8];
+x0_9 = [0.8, 0.9];
  
 xd = [xcdes; xcdotdes'];
  
 figure('Name', 'xc vs vc_des') 
  
-u = Zmp + ZmpVar.*stepfun(t,tvar) - F*xd;
+u = Zmp + ZmpVar .* stepfun(t,tvar) - F*xd;
 y = lsim(SysAs, u,t,x0);
-C1 = plot(t,xcdes,t,y), grid
+
+err_1 = abs(lsim(SysAs, u, t, x0_1)' - xcdes);
+err_2 = abs(lsim(SysAs, u, t, x0_2)' - xcdes);
+err_3 = abs(lsim(SysAs, u, t, x0_3)' - xcdes);
+err_4 = abs(lsim(SysAs, u, t, x0_4)' - xcdes);
+err_5 = abs(lsim(SysAs, u, t, x0_5)' - xcdes);
+err_6 = abs(lsim(SysAs, u, t, x0_6)' - xcdes);
+err_7 = abs(lsim(SysAs, u, t, x0_7)' - xcdes);
+err_8 = abs(lsim(SysAs, u, t, x0_8)' - xcdes);
+err_9 = abs(lsim(SysAs, u, t, x0_9)' - xcdes);
+
+C1 = plot(t, xcdes, t, y, t, abs(y' - xcdes)), grid
+
 set(C1(1),'Color',rossomattone,'LineWidth',1.2);
 set(C1(2),'Color',bluoceano,'LineWidth',1.2);
-legend('x_c^{des}', 'x_c','Location','Best')
- 
- 
-figure(4)
-plot(t, y' - xcdes), grid
+set(C1(3), 'Color', rossomattone, 'LineWidth', 1.2);
+legend('x_c^{des}', 'x_c', 'error', 'Location','Best')
+
+
+figure('Name', 'x0 vs corresponding errors')
+
+C2 = plot(t, err_1,t, err_2,t, err_3, t, err_4, t, err_5, t, err_6, t, err_7, t, err_8, t, err_9)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
