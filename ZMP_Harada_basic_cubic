@@ -1,4 +1,3 @@
-
 % ZMP ---> CoM
 % Harada solution
 % 2 steps
@@ -81,13 +80,13 @@ a15=a11;
 
 % a02=a01+a11*T10;
 % a12 = 3;
-% 
+%
 % a03 = a02+a12*T21;
 % a13=a11;
-% 
+%
 % a04=a03+a13*T32;
 % a14=a12;
-% 
+%
 % a05=a04+a14*T43;
 % a15=a13;
 
@@ -101,28 +100,29 @@ Zmp2 = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
 
        
        
-%i=0..1;  exposants   n=1   
-%j=0..3; temps        m=3
+%i=0..1; exposants n=1
+%j=0..3; temps m=3
 
 %Aij
 
 A11=a11;
 A01=a01;
 
-A02= a02;
-A12= a12;
-A32= a32+1/Tc^2*(0+1)*(1+1)*A12;
-A22= a22+1/Tc^2*(0+1)*(1+1)*A02;
+A32=a32;
+A22= a22;
+A12= a12+1/Tc^2*(1+1)*(1+2)*A32;
+A02= a02+1/Tc^2*(0+1)*(0+2)*A22;
+
 
 
 A13=a13;
 A03=a03;
 
 
-A04= a04;
-A14= a14;
-A34= a34+1/Tc^2*(0+1)*(1+1)*A14;
-A24= a24+1/Tc^2*(0+1)*(1+1)*A04;
+A34=a34;
+A24= a24;
+A14= a14+1/Tc^2*(1+1)*(1+2)*A34;
+A04= a04+1/Tc^2*(0+1)*(0+2)*A24;
 
 A15=a15;
 A05=a05;
@@ -149,7 +149,7 @@ l=[o,zeros(1,6);
     l1,zeros(2,6);
     zeros(2,2),l2,zeros(2,4);
     zeros(2,4),l3,zeros(2,2);
-    zeros(2,6),l4;   
+    zeros(2,6),l4;
     zeros(1,6),Mm1];
              
 D=[xG1-A01;A02-A01*(t1-t0)^0-A11*(t1-t0)^1;
@@ -205,4 +205,3 @@ set(A0(1),'Color',bluoceano,'LineWidth',1.2);%ZMP
 set(A0(2),'Color',rossomattone,'LineWidth',1.2,'LineStyle','--'); %Xc
 
 xlabel('t (sec)', 'FontName','cmr','FontSize',12)
-
