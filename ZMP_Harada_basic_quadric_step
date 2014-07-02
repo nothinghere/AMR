@@ -88,8 +88,8 @@ Zmp = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
         (a05 + a15*(t - t4)).*(stepfun(t,t4)-stepfun(t,t5));
 
       
-%i=0..3; exposants n=3
-%j=0..5; temps m=5
+%i=0..3;  exposants   n=3   
+%j=0..5; temps        m=5
 
 %Aij
 
@@ -132,7 +132,7 @@ l=[o,zeros(1,6);
     l1,zeros(2,6);
     zeros(2,2),l2,zeros(2,4);
     zeros(2,4),l3,zeros(2,2);
-    zeros(2,6),l4;
+    zeros(2,6),l4;   
     zeros(1,6),Mm1];
              
 D=[xG1-A01;A02-A01*(t1-t0)^0-A11*(t1-t0)^1;
@@ -163,13 +163,13 @@ Xc = (VW(1,1)*cosh(Tc*(t-t0))+VW(2,1)*sinh(Tc*(t-t0))+A01*(t-t0).^0+A11*(t-t0).^
      (VW(7,1)*cosh(Tc*(t-t3))+VW(8,1)*sinh(Tc*(t-t3))+A04*(t-t3).^0+A14*(t-t3).^1+A24*(t-t3).^2).*...
      (stepfun(t,t3)-stepfun(t,t4))+...
      (VW(9,1)*cosh(Tc*(t-t4))+VW(10,1)*sinh(Tc*(t-t4))+A05*(t-t4).^0+A15*(t-t4).^1).*...
-     (stepfun(t,t4)-stepfun(t,t5));
+     (stepfun(t,t4)-stepfun(t,t5));      
 
  
-% plot(t,Zmp);
-% hold on
-% plot(t,Xc,'r');grid
-%
+%   plot(t,Zmp);
+%    hold on    
+%      plot(t,Xc,'r');grid
+%      
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -186,7 +186,7 @@ T43n = t4n - t3; % and therefore new time interval
 a05n=a05+a15*(t4n-t4)+0.5*stepss3;
 
 
-A15n=0;
+A15n=a15;
 A05n=a05n;
 
 xG5n=A05n;
@@ -207,11 +207,11 @@ ln=[l0,zeros(2,4);
              
 %connection at t3;
 ZmpT3=Zmp(round(t3/0.001)+1);
-ZmpT4n=Zmp(round(t4n/0.001)+1);
+ZmpT4n=A05n;
 
 xG3p = (Xc(round(t3/0.001)-1)+ Xc(round(t3/0.001)));
 xG3=Xc(round(t3/0.001)+1);
-Dn=[ZmpT3;ZmpT4n;xG3;xG3p;A05n;A15n;
+Dn=[ZmpT3;ZmpT4n;xG3;xG3p;A05n;A15n;  
          
           xG5n-A05n*(t5-t4n)^0-A15n*(t5-t4n)^1];
 
@@ -230,17 +230,21 @@ Xcn = (VW(1,1)*cosh(Tc*(t-t0))+VW(2,1)*sinh(Tc*(t-t0))+A01*(t-t0).^0+A11*(t-t0).
      (stepfun(t,t1)-stepfun(t,t2))+...
     (VW(5,1)*cosh(Tc*(t-t2))+VW(6,1)*sinh(Tc*(t-t2))+A03*(t-t2).^0+A13*(t-t2).^1).*...
      (stepfun(t,t2)-stepfun(t,t3))+...
-(VWn(4,1)*cosh(Tc*(t-t3))+VWn(5,1)*sinh(Tc*(t-t3))+A04n*(t-t3).^0+A14n*(t-t3).^1+A24n*(t-t3).^2).*...
+     (VWn(4,1)*cosh(Tc*(t-t3))+VWn(5,1)*sinh(Tc*(t-t3))+A04n*(t-t3).^0+A14n*(t-t3).^1+A24n*(t-t3).^2).*...
       (stepfun(t,t3)-stepfun(t,t4n))+...
        (VWn(6,1)*cosh(Tc*(t-t4n))+VWn(7,1)*sinh(Tc*(t-t4n))+A05n*(t-t4n).^0+A15n*(t-t4n).^1).*...
-       (stepfun(t,t4n)-stepfun(t,t5));
+       (stepfun(t,t4n)-stepfun(t,t5));  
     
    
 a24n=A24n;
 a14n=A14n;
 a04n=A04n-1/Tc^2*(0+1)*(0+2)*A24n;
 % New desired ZMP trajectory
- Zmpn = (a04n + a14n*(t - t3) + a24n*(t-t3).^2 ).*...
+ Zmpn = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
+        (a02 + a12*(t - t1) + a22*(t-t1).^2).*...
+        (stepfun(t,t1)-stepfun(t,t2)) + ...
+        (a03 + a13*(t - t2)).*(stepfun(t,t2)-stepfun(t,t3)) + ...
+        (a04n + a14n*(t - t3) + a24n*(t-t3).^2 ).*...
         (stepfun(t,t3)-stepfun(t,t4n)) + ...
         (a05n + a15*(t - t4n)).*(stepfun(t,t4n)-stepfun(t,t5));
 
@@ -252,13 +256,13 @@ a04n=A04n-1/Tc^2*(0+1)*(0+2)*A24n;
 figure(2);
 A0 = plot(t,Zmp, t, 0, t, Zmpn, t,Xc, t,0, t, Xcn);
 
-A1 = line([t0,t0],[0,0.8]);
-A2 = line([t1,t1],[0,0.8]);
-A3 = line([t2,t2],[0,0.8]);
-A4 = line([t3,t3],[0,0.8]);
-A5 = line([t4,t4],[0,0.8]);
+A1 = line([t0,t0],[0,1]);
+A2 = line([t1,t1],[0,1]);
+A3 = line([t2,t2],[0,1]);
+A4 = line([t3,t3],[0,1]);
+A5 = line([t4,t4],[0,1]);
 %A6 = line([tvar,tvar],[0,0.8]);
-A7 = line([t4n,t4n],[0,0.8]);
+A7 = line([t4n,t4n],[0,1]);
 
 
 grid
@@ -277,3 +281,9 @@ set(A0(2),'Color',bluoceano,'LineWidth',1.2,'LineStyle','--'); % Delta ZMP
 %set(A0(4),'Color',bluoceano,'LineWidth',1.2);
 %set(A0(3),'Color',rossomattone,'LineWidth',1.2);
 %set(A0(6),'Color',rossomattone,'LineWidth',1.2);
+
+xlabel('t (sec)', 'FontName','cmr','FontSize',12)
+
+
+     
+     
