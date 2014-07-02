@@ -96,26 +96,24 @@ Zmp = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
 A11=a11;
 A01=a01;
 
-A02= a02;
+A22= a22;
 A12= a12;
-A22= a22+1/Tc^2*(0+1)*(1+1)*A02;
+A02= a02+1/Tc^2*(0+1)*(0+2)*A22;
 
 
 A13=a13;
 A03=a03;
 
 
-A04= a04;
+A24= a24;
 A14= a14;
-A24= a24+1/Tc^2*(0+1)*(1+1)*A04;
+A04= a04+1/Tc^2*(0+1)*(0+2)*A24;
 
 A15=a15;
 A05=a05;
 
 xG1=a01;
-xG2=a02;
-xG3=a03;
-xG4=a04;
+
 xG5=a05;
 
 
@@ -187,94 +185,59 @@ t4n = t4 + 0.2; % new t4n
 T43n = t4n - t3; % and therefore new time interval
 a05n=a05+a15*(t4n-t4)+0.5*stepss3;
 
-a24n = (a05n - a04)/((t4n-t3)^2+2*t3*(t4n-t3));
-a14n = 2*a24n*t3;
-
-%
-% a24 = 3/T43n^2*(a05 - a04);
-% a34 = 2/T43n^3*(a04 - a05);
-
-% New desired ZMP trajectory
-Zmpn = (a01 + a11*(t - t0)).*(stepfun(t,t0)-stepfun(t,t1)) +...
-        (a02 + a12*(t - t1) + a22*(t-t1).^2).*...
-        (stepfun(t,t1)-stepfun(t,t2)) + ...
-        (a03 + a13*(t - t2)).*(stepfun(t,t2)-stepfun(t,t3)) + ...
-        (a04 + a14n*(t - t3) + a24n*(t-t3).^2 ).*...
-        (stepfun(t,t3)-stepfun(t,t4n)) + ...
-        (a05n + a15*(t - t4n)).*(stepfun(t,t4n)-stepfun(t,t5));
-        %a05*(stepfun(t,t4n)-stepfun(t,t5));
-    
-A04n= a04;
-A14n= a14n;
-A24n= a24n+1/Tc^2*(0+1)*(1+1)*A04n;    
-
 
 A15n=0;
 A05n=a05n;
 
 xG5n=A05n;
-l0= [1, 0,-2/Tc^2;1,T10,T10^2-2/Tc^2];
-l11=[1,0,0;0,1,0;1,T10,T10^2;0,1,2*T10];
+l0= [1, 0,-2/Tc^2;1,T43n,T43n^2-2/Tc^2];
+l11=[1,0,0;0,1,0;1,T43n,T43n^2;0,1,2*T43n];
 l12=[1,0,0,0;
     0,Tc,0,0;
-    cosh(Tc*T10),sinh(Tc*T10),-1,0;
-    Tc*sinh(Tc*T10),Tc*cosh(Tc*T10),0,-Tc];
+    cosh(Tc*T43n),sinh(Tc*T43n),-1,0;
+    Tc*sinh(Tc*T43n),Tc*cosh(Tc*T43n),0,-Tc];
 
 l4n=li(t3,t4n,Tc);
 Mm1n= [0 0 cosh(Tc*(t5-t4n)) sinh(Tc*(t5-t4n))];
 
-ln=[l0,zeros(2,10);
-    l11,l12,zeros(4,6);
-    zeros(2,5),l2,zeros(2,4);
-    zeros(2,7),l3,zeros(2,2);
-    zeros(2,9),l4n;   
-    zeros(1,9),Mm1n];
+ln=[l0,zeros(2,4);
+    l11,l12;
+    zeros(1,3),Mm1n];
+
              
+%connection at t3;
+ZmpT3=Zmp(round(t3/0.001)+1);
+ZmpT4n=Zmp(round(t4n/0.001)+1);
 
-ZmpT0=Zmp(round(t0/0.001)+1);
-ZmpT1=Zmp(round(t1/0.001)+1);
-
-xG1p = (Zmp(round(t0/0.001)+1)+Zmp(round(t0/0.001+2)))/0.001;
-
-Dn=[ZmpT0;ZmpT1;xG1;xG1p;A02;A12;    
-          
-          A03-A02*(t2-t1)^0-A12*(t2-t1)^1-A22*(t2-t1)^2;
-          A13-A12*1*(t2-t1)^0-A22*2*(t2-t1)^1
-          
-          A04n-A03*(t3-t2)^0-A13*(t3-t2)^1;
-          A14n-A13*1*(t3-t2)^0;
-          
-          A05n-A04n*(t4n-t3)^0-A14n*(t4n-t3)^1-A24n*(t4n-t3)^2;
-          A15n-A14n*1*(t4n-t3)^0-A24n*2*(t4n-t3)^1;
+xG3p = (Xc(round(t3/0.001)-1)+ Xc(round(t3/0.001)));
+xG3=Xc(round(t3/0.001)+1);
+Dn=[ZmpT3;ZmpT4n;xG3;xG3p;A05n;A15n;  
          
           xG5n-A05n*(t5-t4n)^0-A15n*(t5-t4n)^1];
 
     
   
 VWn=ln\Dn;
+ 
 
+A04n=VWn(1,1);
+A14n=VWn(2,1);
+A24n=VWn(3,1);
 
-A01n=VWn(1,1);
-A11n=VWn(2,1);
-A21n=VWn(3,1);
-
-Xcn = (VWn(4,1)*cosh(Tc*(t-t0))+VWn(5,1)*sinh(Tc*(t-t0))+A01n*(t-t0).^0+A11n*(t-t0).^1+A21n*(t-t0).^2).*...
-     (stepfun(t,t0)-stepfun(t,t1))+...
-    (VWn(6,1)*cosh(Tc*(t-t1))+VWn(7,1)*sinh(Tc*(t-t1))+A02*(t-t1).^0+A12*(t-t1).^1+A22*(t-t1).^2).*...
-     (stepfun(t,t1)-stepfun(t,t2))+...
-     (VWn(8,1)*cosh(Tc*(t-t2))+VWn(9,1)*sinh(Tc*(t-t2))+A03*(t-t2).^0+A13*(t-t2).^1).*...
-      (stepfun(t,t2)-stepfun(t,t3))+...
-      (VWn(10,1)*cosh(Tc*(t-t3))+VWn(11,1)*sinh(Tc*(t-t3))+A04n*(t-t3).^0+A14n*(t-t3).^1+A24n*(t-t3).^2).*...
+Xcn = (VWn(4,1)*cosh(Tc*(t-t3))+VWn(5,1)*sinh(Tc*(t-t3))+A04n*(t-t3).^0+A14n*(t-t3).^1+A24n*(t-t3).^2).*...
       (stepfun(t,t3)-stepfun(t,t4n))+...
-      (VWn(12,1)*cosh(Tc*(t-t4n))+VWn(13,1)*sinh(Tc*(t-t4n))+A05n*(t-t4n).^0+A15n*(t-t4n).^1).*...
-      (stepfun(t,t4n)-stepfun(t,t5));  
+       (VWn(6,1)*cosh(Tc*(t-t4n))+VWn(7,1)*sinh(Tc*(t-t4n))+A05n*(t-t4n).^0+A15n*(t-t4n).^1).*...
+       (stepfun(t,t4n)-stepfun(t,t5));  
     
-    
-    
-    XcVar=0;
-    
-    
-    
+   
+a24n=A24n;
+a14n=A14n;
+a04n=A04n-1/Tc^2*(0+1)*(0+2)*A24n;
+% New desired ZMP trajectory
+ Zmpn = (a04n + a14n*(t - t3) + a24n*(t-t3).^2 ).*...
+        (stepfun(t,t3)-stepfun(t,t4n)) + ...
+        (a05n + a15*(t - t4n)).*(stepfun(t,t4n)-stepfun(t,t5));
+
     
     
 
@@ -289,7 +252,7 @@ A3 = line([t2,t2],[0,0.8]);
 A4 = line([t3,t3],[0,0.8]);
 A5 = line([t4,t4],[0,0.8]);
 %A6 = line([tvar,tvar],[0,0.8]);
-%A7 = line([t4n,t4n],[0,0.8]);
+A7 = line([t4n,t4n],[0,0.8]);
 
 
 grid
@@ -299,7 +262,7 @@ set(A3(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
 set(A4(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
 set(A5(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
 %set(A6(1),'Color',rossomattone,'LineWidth',0.5,'LineStyle','-.');
-%set(A7(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+set(A7(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
 
 
 set(A0(1),'Color',bluoceano,'LineWidth',1.2);
