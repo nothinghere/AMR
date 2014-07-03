@@ -1,0 +1,121 @@
+function [ Xcs] = getXcs( t1)
+t = 0:0.001:4;
+
+g = 9.8;
+zh = 0.8; % Center of Mass constant height
+
+om = sqrt(g/zh);
+
+% Steps time duration
+
+%stepss1 = 0.7; % First Single support step duration (1st segment)
+stepds2 = 0.1; % First Double support step duration (2nd segment)
+stepss3 = 0.7; % Second Single support step duration (3rd segment)
+stepds4 = 0.1; % Second Double support step duration (4th segment)
+stepss5 = 0.7; % Third Single support step duration (5th segment)
+
+
+steplength1 = 0.3; % First step length
+steplength2 = 0.3; % Second step length
+
+
+t0 = 0.0; % Initial time
+%t1 = t0 + stepss1;
+t2 = t1 + stepds2;
+t3 = t2 + stepss3;
+t4 = t3 + stepds4;
+t5 = t4 + stepss5 + 20; % These 20 seconds are added since calculus is anticipative
+
+% Terms and coefficients used in the desired ZMP trajectory
+T10 = t1 - t0;
+T21 = t2 - t1;
+T32 = t3 - t2;
+T43 = t4 - t3;
+T54 = t5 - t4;
+
+a01 = 0;
+
+a11=0.00;
+a03 = steplength1;
+
+
+a05 = a03 + steplength2;
+
+a02 = a01+a11*T10;
+a12 = a01;
+a22 = 3/T21^2*(a03 - a02);
+
+a13=a11;
+a32 = 2/T21^3*(a02 - a03);
+
+a04 = a03+a13*T32;
+a14 = a12;
+a24 = 3/T43^2*(a05 - a04);
+a34 = 2/T43^3*(a04 - a05);
+a15=a11;
+
+
+% Constant segment from t0 to t1
+
+%Xc1 = x_constant( t0, t1, a01, om, t);
+
+
+Xc1 = a11*x_linear( t0, t1, T10,om, t)+x_constant( t0, t1, a01, om, t);
+
+% Second segment from t1 to t2 --- Spline
+% various terms are computed separately and added at the end
+
+% Cubic terms
+
+Cubic2 =x_cubic( t1,t2,T21,om,t );
+% Quadratic terms
+
+ Quad2 = x_quadric( t1,t2,T21,om,t );
+% Linear terms
+ Lin2 =x_linear( t1,t2,T21,om,t );
+% Constant term
+
+Cost2 = x_constant(t1,t2,a02,om,t);
+
+% Final Spline from t1 to t2 (second segment)
+Xc2 = a32*Cubic2 + a22*Quad2 + a12*Lin2 + Cost2;
+
+% Third segment from t2 to t3: Constant
+%Xc3 =x_constant(t2,t3,a03,om,t);
+Xc3 =a13*x_linear(t2,t3,T32,om,t)+x_constant(t2,t3,a03,om,t);
+% Fourth segment from t3 to t4 --- Spline
+
+% Cubic terms
+
+Cubic4 = x_cubic(t3,t4,T43,om,t);
+
+% Quadratic terms
+
+Quad4 = x_quadric(t3,t4,T43,om,t);
+
+
+% Linear terms
+
+Lin4 = x_linear(t3,t4,T43,om,t);
+
+% Linear terms
+Cost4 =x_constant(t3,t4,1,om,t);
+         
+
+% Final spline from t3 to t4 --- Fourth segment
+Xc4 = a34*Cubic4 + a24*Quad4 + a14*Lin4 + a04*Cost4;
+
+         
+
+% Fifth segment: Constant from t4 to t5
+%Xc5 = x_constant(t4,t5,a05,om,t);
+Xc5 = a15*x_linear(t4,t5,T54,om,t)+ x_constant(t4,t5,a05,om,t);
+
+         
+% Xcstar final
+
+Xcs = Xc1 + Xc2 + Xc3 + Xc4 + Xc5;
+
+
+end
+
