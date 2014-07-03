@@ -209,10 +209,9 @@ ln=[l0,zeros(2,4);
 ZmpT3=Zmp(round(t3/0.001)+1);
 ZmpT4n=A05n;
 
-xG3p = (Xc(round(t3/0.001)-1)+ Xc(round(t3/0.001)));
+xG3p = Tc*VW(5,1)*sinh(Tc*(t3-t2))+Tc*VW(6,1)*cosh(Tc*(t3-t2))+A13*(t3-t2).^0;
 xG3=Xc(round(t3/0.001)+1);
-Dn=[ZmpT3;ZmpT4n;xG3;xG3p;A05n;A15n;  
-         
+Dn=[ZmpT3;ZmpT4n;xG3;xG3p;A05n;A15n; 
           xG5n-A05n*(t5-t4n)^0-A15n*(t5-t4n)^1];
 
     
