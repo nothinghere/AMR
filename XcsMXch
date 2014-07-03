@@ -1,0 +1,14 @@
+close all
+t = 0:0.001:4;
+
+%comparison Xch and Xc
+figure;
+hold on
+for t1=0.1:0.1:1    
+    xG1=0;
+    Xch = getXch(t1,xG1);
+    Xcs =getXcs(t1);
+    plot(t,Xcs-Xch,'color',[ 0.8 0.3  t1]);
+end;
+legend('0.1','0.2','0.3','0.4','0.5','0.6','0.7','0.8','0.9','1')
+hold off
