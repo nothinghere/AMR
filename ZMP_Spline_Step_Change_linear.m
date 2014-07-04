@@ -14,6 +14,7 @@ clear all
 rossomattone = [ 1.0 0.3 0.3 ];
 bluoceano    = [ 0.0 0.5 0.9 ];
 gialloocra   = [ 0.75 0.75 0.0 ];
+green = [0 1 0];
 
 % Cost-Lin-Cost parameters
 % aij = a_i^{(j)} Harada's notation
@@ -236,36 +237,36 @@ XcVar = Xcv1 + Xcv2 + Xcv3;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-figure(2)
-A0 = plot(t,Zmp, t, ZmpVar, t, Zmpn+ZmpVar, t,Xc, t,XcVar, t, Xc+XcVar);
-A1 = line([t0,t0],[0,0.8]);
-A2 = line([t1,t1],[0,0.8]);
-A3 = line([t2,t2],[0,0.8]);
-A4 = line([t3,t3],[0,0.8]);
-A5 = line([t4,t4],[0,0.8]);
-
-A6 = line([tvar,tvar],[0,0.8]);
-A7 = line([t4n,t4n],[0,0.8]);
-
-
-grid
-set(A1(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
-set(A2(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
-set(A3(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
-set(A4(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
-set(A5(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
-set(A6(1),'Color',rossomattone,'LineWidth',0.5,'LineStyle','-.');
-set(A7(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
-
-
-set(A0(1),'Color',bluoceano,'LineWidth',1.2);
-set(A0(2),'Color',bluoceano,'LineWidth',1.2,'LineStyle','--'); % Delta ZMP
-set(A0(5),'Color',rossomattone,'LineWidth',1.2,'LineStyle','--'); % Delta Xc
-set(A0(4),'Color',bluoceano,'LineWidth',1.2);
-set(A0(3),'Color',rossomattone,'LineWidth',1.2);
-set(A0(6),'Color',rossomattone,'LineWidth',1.2);
-
-xlabel('t (sec)', 'FontName','cmr','FontSize',12)
+% figure(2)
+% A0 = plot(t,Zmp, t, ZmpVar, t, Zmpn+ZmpVar, t,Xc, t,XcVar, t, Xc+XcVar);
+% A1 = line([t0,t0],[0,0.8]);
+% A2 = line([t1,t1],[0,0.8]);
+% A3 = line([t2,t2],[0,0.8]);
+% A4 = line([t3,t3],[0,0.8]);
+% A5 = line([t4,t4],[0,0.8]);
+% 
+% A6 = line([tvar,tvar],[0,0.8]);
+% A7 = line([t4n,t4n],[0,0.8]);
+% 
+% 
+% grid
+% set(A1(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+% set(A2(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+% set(A3(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+% set(A4(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+% set(A5(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+% set(A6(1),'Color',rossomattone,'LineWidth',0.5,'LineStyle','-.');
+% set(A7(1),'Color',bluoceano,'LineWidth',1, 'LineStyle',':');
+% 
+% 
+% set(A0(1),'Color',bluoceano,'LineWidth',1.2);
+% set(A0(2),'Color',bluoceano,'LineWidth',1.2,'LineStyle','--'); % Delta ZMP
+% set(A0(5),'Color',rossomattone,'LineWidth',1.2,'LineStyle','--'); % Delta Xc
+% set(A0(4),'Color',bluoceano,'LineWidth',1.2);
+% set(A0(3),'Color',rossomattone,'LineWidth',1.2);
+% set(A0(6),'Color',rossomattone,'LineWidth',1.2);
+% 
+% xlabel('t (sec)', 'FontName','cmr','FontSize',12)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -293,43 +294,97 @@ SysAs = ss(A+B*F,B,C,D);  % Closed-loop system
  
  
 x0 = [0, 0];
+
+% try with diff x0 values
+
 x0_1 = [0.1, 0.1];
 x0_2 = [0.2, 0.2];
 x0_3 = [0.3, 0.3];
 x0_4 = [0.4, 0.4];
-x0_5 = [0.1, 0.5];
-x0_6 = [0.5, 0.6];
-x0_7 = [0.6, 0.7];
-x0_8 = [0.7, 0.8];
-x0_9 = [0.8, 0.9];
+x0_5 = [0.5, 0.5];
+x0_6 = [0.6, 0.6];
+x0_7 = [0.7, 0.7];
+x0_8 = [0.8, 0.8];
+x0_9 = [0.9, 0.9];
  
 xd = [xcdes; xcdotdes'];
  
-figure('Name', 'xc vs vc_des') 
+% figure('Name', 'xc vs vc_des') 
  
 u = Zmp + ZmpVar .* stepfun(t,tvar) - F*xd;
 y = lsim(SysAs, u,t,x0);
+xcdot = lsim(SysD,y,t);
 
-err_1 = abs(lsim(SysAs, u, t, x0_1)' - xcdes);
-err_2 = abs(lsim(SysAs, u, t, x0_2)' - xcdes);
-err_3 = abs(lsim(SysAs, u, t, x0_3)' - xcdes);
-err_4 = abs(lsim(SysAs, u, t, x0_4)' - xcdes);
-err_5 = abs(lsim(SysAs, u, t, x0_5)' - xcdes);
-err_6 = abs(lsim(SysAs, u, t, x0_6)' - xcdes);
-err_7 = abs(lsim(SysAs, u, t, x0_7)' - xcdes);
-err_8 = abs(lsim(SysAs, u, t, x0_8)' - xcdes);
-err_9 = abs(lsim(SysAs, u, t, x0_9)' - xcdes);
+% err_01 = abs(lsim(SysAs, u, t, x0_1)' - xcdes);
+% err_02 = abs(lsim(SysAs, u, t, x0_2)' - xcdes);
+% err_03 = abs(lsim(SysAs, u, t, x0_3)' - xcdes);
+% err_04 = abs(lsim(SysAs, u, t, x0_4)' - xcdes);
+% err_05 = abs(lsim(SysAs, u, t, x0_5)' - xcdes);
+% err_06 = abs(lsim(SysAs, u, t, x0_6)' - xcdes);
+% err_07 = abs(lsim(SysAs, u, t, x0_7)' - xcdes);
+% err_08 = abs(lsim(SysAs, u, t, x0_8)' - xcdes);
+% err_09 = abs(lsim(SysAs, u, t, x0_9)' - xcdes);
 
-C1 = plot(t, xcdes, t, y, t, abs(y' - xcdes)), grid
+% try with diff eigenvalues
+% 
+DesEig_1 = [-1, -2];
+DesEig_2 = [-2, -4];
+DesEig_3 = [-3, -6];
+DesEig_4 = [-4, -8];
+DesEig_5 = [-5, -10];
+DesEig_6 = [-6, -12];
+% DesEig_7 = [-2, -1];
+% DesEig_8 = [-4, -2];
+% DesEig_9 = [-6, -3];
+% DesEig_10 = [-8, -4];
+% DesEig_11 = [-10, -5];
+% DesEig_12 = [-12, -6];
 
-set(C1(1),'Color',rossomattone,'LineWidth',1.2);
-set(C1(2),'Color',bluoceano,'LineWidth',1.2);
-set(C1(3), 'Color', rossomattone, 'LineWidth', 1.2);
-legend('x_c^{des}', 'x_c', 'error', 'Location','Best')
+err_01 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_1);
+err_02 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_2);
+err_03 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_3);
+err_04 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_4);
+err_05 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_5);
+err_06 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_6);
+err_07 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_7);
+err_08 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_8);
+err_09 = compute_error(A,B,C,D, DesEig, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0_9);
 
+err_11 = compute_error(A,B,C,D, DesEig_1, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+err_12 = compute_error(A,B,C,D, DesEig_2, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+err_13 = compute_error(A,B,C,D, DesEig_3, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+err_14 = compute_error(A,B,C,D, DesEig_4, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+err_15 = compute_error(A,B,C,D, DesEig_5, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+err_16 = compute_error(A,B,C,D, DesEig_6, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+% err_17 = compute_error(A,B,C,D, DesEig_7, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+% err_18 = compute_error(A,B,C,D, DesEig_8, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+% err_19 = compute_error(A,B,C,D, DesEig_9, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+% err_110 = compute_error(A,B,C,D, DesEig_10, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+% err_111 = compute_error(A,B,C,D, DesEig_11, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+% err_112 = compute_error(A,B,C,D, DesEig_12, Zmp, ZmpVar, t, tvar, xcdes, xcdotdes, x0);
+
+% errors_vectors = [y' - xcdes; xcdot' - xcdotdes']';
+
+% error = sqrt(sum(abs(errors_vectors).^2,2));
+
+% C1 = plot(t, xcdes, t, y, t, error);
+
+% set(C1(1),'Color',rossomattone,'LineWidth',1.2);
+% set(C1(2),'Color',bluoceano,'LineWidth',1.2);
+% set(C1(3), 'Color', rossomattone, 'LineWidth', 1.2);
+% set(C1(4), 'Color', bluoceano, 'LineWidth', 1.2);
+% set(C1(5), 'Color', rossoma, 'LineWidth', 1.2);
+% legend('x_c^{des}', 'x_c', 'error', 'Location','Best')
 
 figure('Name', 'x0 vs corresponding errors')
 
-C2 = plot(t, err_1,t, err_2,t, err_3, t, err_4, t, err_5, t, err_6, t, err_7, t, err_8, t, err_9)
+C2 = plot(t, err_01,t, err_02,t, err_03, t, err_04, t, err_05, t, err_06, t, err_07, t, err_08, t, err_09);
+legend('[0.2, 0.2]', '[0.3, 0.3]', '[0.4, 0.4]', '[0.5, 0.5]', '[0.6, 0.6]', '[0.7, 0.7]', '[0.8, 0.8]', '[0.9, 0.9]');
+
+figure('Name', 'eigenvalues vs corresponding errors')
+
+C3 = plot(t, err_11, t, err_12, t, err_13, t, err_14, t, err_15, t, err_16);
+
+legend('[-1, -2]','[-2, -4]','[-3, -6]','[-4, -8]','[-5, -10]','[-6, -12]');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
