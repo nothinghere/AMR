@@ -191,7 +191,7 @@ Xc = (VW(1,1)*cosh(Tc*(t-t0))+VW(2,1)*sinh(Tc*(t-t0))+A01*(t-t0).^0+A11*(t-t0).^
 
 t4n = t4 + 0.2; % new t4n
 T43n = t4n - t3; % and therefore new time interval
-a05n=a05+a15*(t4n-t4)+0.5*stepss3;
+a05n=a05+a15*(t4n-t4)+steplength2/2;
 
 
 A15n=a15;
@@ -276,14 +276,14 @@ a04n=A04n-1/Tc^2*(0+1)*(0+2)*A24n;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-figure(2);
-A0 = plot(t,0, t, 0, t, 0, t,Xc, t,Zmpn, t, Xcn);
+figure(3);
+A0 = plot(t,0, t, 0, t, Zmp, t,Xc, t,Zmpn, t, Xcn);
 
-A1 = line([t0,t0],[0,1]);
-A2 = line([t1,t1],[0,1]);
-A3 = line([t2,t2],[0,1]);
-A4 = line([t3,t3],[0,1]);
-A5 = line([t4,t4],[0,1]);
+A1 = line([t0,t0],[0,0.8]);
+A2 = line([t1,t1],[0,0.8]);
+A3 = line([t2,t2],[0,0.8]);
+A4 = line([t3,t3],[0,0.8]);
+A5 = line([t4,t4],[0,0.8]);
 %A6 = line([tvar,tvar],[0,0.8]);
 A7 = line([t4n,t4n],[0,1]);
 
